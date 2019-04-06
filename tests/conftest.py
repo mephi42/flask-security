@@ -54,8 +54,13 @@ def app(request):
                 'trackable', 'passwordless', 'confirmable']:
         app.config['SECURITY_' + opt.upper()] = opt in request.keywords
 
-    if 'settings' in request.keywords:
-        for key, value in request.keywords['settings'].kwargs.items():
+    pytest_major = int(pytest.__version__.split('.')[0])
+    if pytest_major >= 4:
+        settings = request.node.get_closest_marker('settings')
+    else:
+        settings = request.keywords.get('settings')
+    if settings is not None:
+        for key, value in settings.kwargs.items():
             app.config['SECURITY_' + key.upper()] = value
 
     mail = Mail(app)
